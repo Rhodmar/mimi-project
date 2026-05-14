@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  name         String
+  email        String        @unique
+  password     String
+  role         String
+  reservations Reservation[]
+}
+
+model Project {
+  id    Int    @id @default(autoincrement())
+  name  String
+  image String
+  units Unit[]
+}
+
+model Unit {
+  id           Int           @id @default(autoincrement())
+  unitCode     String
+  status       String        @default("available")
+  price        Float
+  x            Int
+  y            Int
+  projectId    Int
+  project      Project       @relation(fields: [projectId], references: [id])
+  reservations Reservation[]
+}
+
+model Reservation {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  unitId      Int
+  status      String    @default("pending_fulfillment")
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  // Legacy display name (set from firstName + lastName)
+  clientName  String?
+
+  // Purchase Intent
+  purpose            String?
+  whyChooseProject   String?
+  howLearnedAbout    String?
+
+  // Payment
+  sdp         String?
+  computation String?
+
+  // Documents
+  govIdPath   String?
+  appDocPath  String?
+  paymentPath String?
+
+  // Personal Info
+  firstName         String?
+  middleName        String?
+  lastName          String?
+  age               String?
+  sex               String?
+  civilStatus       String?
+  birthday          String?
+  nationality       String?
+  homeAddress       String?
+  telNo             String?
+  addressAbroad     String?
+  officeAddress     String?
+  emailAddress      String?
+  mobileNumber      String?
+  businessName      String?
+  position          String?
+  occupationalField String?
+
+  // Spouse Info
+  spouseFirstName     String?
+  spouseMiddleName    String?
+  spouseSurname       String?
+  spouseAge           String?
+  spouseSex           String?
+  spouseBirthday      String?
+  spouseNationality   String?
+  spouseAddressAbroad String?
+  spouseTelAbroad     String?
+  spouseOfficeAddress String?
+  spouseTelOffice     String?
+  spouseEmail         String?
+  spouseMobile        String?
+  spouseBusinessName  String?
+  spousePosition      String?
+  spouseOccupField    String?
+
+  // Certification
+  certFullName         String?
+  certTin              String?
+  certResCertNo        String?
+  certDateIssue        String?
+  certPlaceIssue       String?
+  spouseCertFullName   String?
+  spouseCertTin        String?
+  spouseCertResCertNo  String?
+  spouseCertDateIssue  String?
+  spouseCertPlaceIssue String?
+  isCertified          Boolean   @default(false)
+
+  // Admin
+  adminNote   String?
+  resolvedAt  DateTime?
+
+  // Customer link (set when reservation form is submitted)
+  customerId  Int?
+  customer    Customer? @relation(fields: [customerId], references: [id])
+
+  user User @relation(fields: [userId], references: [id])
+  unit Unit @relation(fields: [unitId], references: [id])
+}
+
+model Customer {
+  id          Int      @id @default(autoincrement())
+  firstName   String
+  middleName  String?
+  lastName    String
+  email       String?  @unique
+  mobile      String?
+  homeAddress String?
+  nationality String?
+  civilStatus String?
+  tin         String?
+
+  tags        String?
+  notes       String?  @db.Text
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  reservations Reservation[]
+}
